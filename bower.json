@@ -1,0 +1,21 @@
+{
+  "name": "storage-backed-queue",
+  "version": "0.0.0",
+  "homepage": "https://github.com/intelligentgolf/storage-backed-queue",
+  "authors": [
+    "Michal Charemza <michalcharemza@gmail.com>"
+  ],
+  "description": "AngularJS service that persists and retries a queue of promise-based asynchronous function calls to HTML5 storage",
+  "main": "src/storage-backed-queue.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "storage-backed-object": "intelligentgolf/storage-backed-object#~0.0.2"
+  }
+}

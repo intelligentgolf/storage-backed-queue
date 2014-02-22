@@ -18,7 +18,12 @@ angular.module('storage-backed-queue',['storage-backed-object'])
     };
 
     StorageBackedQueue.prototype.getRequests = function() {
-      return this.storage.get('requests');
+      return this.storage.get('requests',[]);
+    }
+
+
+    StorageBackedQueue.prototype.clearQueue = function() {
+      return this.storage.set('requests',[]);
     }
 
     StorageBackedQueue.prototype.saveRequests = function(requests) {
@@ -39,18 +44,15 @@ angular.module('storage-backed-queue',['storage-backed-object'])
     StorageBackedQueue.prototype.runNext = function() {
       var self = this;
       var next = this.getRequests()[0];
-
       // funcs[next.name] might not be defined until all the registration functions
       // have been run.
       if (!running && next && funcs[next.name]) {
         running = true;
         return funcs[next.name](next.params).then(function() {
-          console.log('success');
           self.shift();
           running = false;
           self.runNext();
         }, function(rejection) {
-          console.log('fail',rejection);
           // If a failure, retry after timeout. Will be the same function
           return $timeout(function() {
             running = false;
@@ -66,7 +68,6 @@ angular.module('storage-backed-queue',['storage-backed-object'])
         name: this.funcName(), 
         params: params
       });
-      console.log('saving requests',requests);
       this.saveRequests(requests);   
     }
 

@@ -14,5 +14,8 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "storage-backed-object": "intelligentgolf/storage-backed-object#~0.0.2"
+  }
 }

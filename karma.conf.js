@@ -16,6 +16,7 @@ module.exports = function(config) {
       'bower_components/angular-mocks/angular-mocks.js',
       'bower_components/angularLocalStorage/src/angularLocalStorage.js',
       'bower_components/angular-lo-dash/src/angular-lo-dash.js',
+      'bower_components/storage-backed-object/src/storage-backed-object.js',
       'src/*.js',
       'test/*.js'
     ],

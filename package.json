@@ -1,0 +1,12 @@
+{
+  "name": "storage-backed-queue",
+  "devDependencies": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/intelligentgolf/storage-backed-queue.git"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS,Firefox"
+  }
+}

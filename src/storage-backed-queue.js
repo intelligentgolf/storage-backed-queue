@@ -1,5 +1,5 @@
 angular.module('storage-backed-queue',['storage-backed-object'])
-  .factory('StorageBackedQueue', function(StorageBackedObject) {
+  .factory('StorageBackedQueue', function(StorageBackedObject, $timeout) {
     var funcs = {};
     var running = false;
     var timeout = 5 * 1000;

@@ -4,15 +4,16 @@ describe('StorageBackedQueue', function () {
 
   beforeEach(module('storage-backed-queue'));
 
-  var StorageBackedQueue, StorageBackedObject, sbQueue, $q, $rootScope;
+  var StorageBackedQueue, StorageBackedObject, sbQueue, $q, $rootScope, $timeout;
   var globalQueue = 'storage-queue';
   var thisInstance = 'instance';
   var defer1, defer2, func;
   var param1 = {'test':'val1'}, param2 = {'test':'val2'};
 
-  beforeEach(inject(function (_StorageBackedQueue_, _StorageBackedObject_, _$q_, _$rootScope_) {
+  beforeEach(inject(function (_StorageBackedQueue_, _StorageBackedObject_, _$q_, _$rootScope_, _$timeout_) {
     $q = _$q_;
     $rootScope = _$rootScope_;
+    $timeout = _$timeout_;
     StorageBackedQueue = _StorageBackedQueue_;
     StorageBackedObject = _StorageBackedObject_;
     sbQueue = StorageBackedQueue(globalQueue, thisInstance);
@@ -35,14 +36,14 @@ describe('StorageBackedQueue', function () {
       sbQueue.clearQueue();
     })
 
-    it('after calling next the registered function should be called', function() {
-      sbQueue.next(param1);
+    it('after calling run the registered function should be called', function() {
+      sbQueue.run(param1);
       expect(func).toHaveBeenCalledWith(param1);
     });
 
-    it('after calling next the registered function should only be called after the first promise resolved', function() {
-      sbQueue.next(param1);
-      sbQueue.next(param2);
+    it('after calling run the registered function should only be called after the first promise resolved', function() {
+      sbQueue.run(param1);
+      sbQueue.run(param2);
       expect(func).not.toHaveBeenCalledWith(param2);
       defer1.resolve();
       $rootScope.$apply();
@@ -60,22 +61,35 @@ describe('StorageBackedQueue', function () {
 
     beforeEach(function() {
       // Manually populate the storage backed object
-      // faking a browser restart
-      sbQueue.register(func);
+      // faking a browser restart. Fragile to 
+      // implemenetation of StorageBackedObject
       sbObject = StorageBackedObject(globalQueue);
-
-      sbObject.set('requests', [{
+      sbObject.set('queue', [{
           name: getFuncName(globalQueue, thisInstance), 
           params: param1
       }]);
+
+      sbQueue.register(func);
     });
 
     it('the registered function is called', function() {
-       sbQueue.runNext();
-       $rootScope.$apply();
-       expect(func).toHaveBeenCalledWith(param1);
+      $rootScope.$apply();
+      expect(func).toHaveBeenCalledWith(param1);
     });
   });
 
+  describe('After a failed registered function call', function() {
+    it('the function is retried', function() {
+      sbQueue.register(func);
+      sbQueue.run(param1);
+      expect(func).toHaveBeenCalledWith(param1);
+      func.reset();
+
+      defer1.reject();
+      $rootScope.$apply();
+      $timeout.flush();
+      expect(func).toHaveBeenCalledWith(param1);
+    });
+  });
 
 });

@@ -1,6 +1,6 @@
 {
   "name": "storage-backed-queue",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/intelligentgolf/storage-backed-queue",
   "authors": [
     "Michal Charemza <michalcharemza@gmail.com>"

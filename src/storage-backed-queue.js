@@ -3,79 +3,80 @@ angular.module('storage-backed-queue',['storage-backed-object'])
     var funcs = {};
     var running = false;
     var timeout = 5 * 1000;
+    var queueKey = 'queue';
 
-    var StorageBackedQueue = function(globalName, instanceName) {
-      this.globalName = globalName
-      this.instanceName = instanceName;
+    var StorageBackedQueue = function(globalName_, instanceName_) {
 
-      // Same storage shared by all queues      
-      this.storage = StorageBackedObject(this.globalName);
-      this.saveRequests(this.getRequests() || []);
-    };
+      /* Private members */
 
-    StorageBackedQueue.prototype.funcName = function() {
-      return this.globalName + '---' + this.instanceName;
-    };
+      var globalName = globalName_;
+      var instanceName = instanceName_;
+      var storage = StorageBackedObject(globalName);
 
-    StorageBackedQueue.prototype.getRequests = function() {
-      return this.storage.get('requests',[]);
-    }
+      /* Private methods */
 
-
-    StorageBackedQueue.prototype.clearQueue = function() {
-      return this.storage.set('requests',[]);
-    }
-
-    StorageBackedQueue.prototype.saveRequests = function(requests) {
-      return this.storage.set('requests', requests);
-    }    
-
-    StorageBackedQueue.prototype.register = function(func) {
-      funcs[this.funcName()] = func;
-    };
-
-    // Does not return a promise, as can't be guarenteed to run
-    // after a restart
-    StorageBackedQueue.prototype.next = function(params) {
-      this.push(params);
-      return this.runNext();
-    };
-
-    StorageBackedQueue.prototype.runNext = function() {
-      var self = this;
-      var next = this.getRequests()[0];
-      // funcs[next.name] might not be defined until all the registration functions
-      // have been run.
-      if (!running && next && funcs[next.name]) {
-        running = true;
-        return funcs[next.name](next.params).then(function() {
-          self.shift();
-          running = false;
-          self.runNext();
-        }, function(rejection) {
-          // If a failure, retry after timeout. Will be the same function
-          return $timeout(function() {
-            running = false;
-            return self.runNext();
-          }, timeout);
+      var push = function(params) {
+        var queue = getQueue();
+        queue.push({
+          name: funcName(), 
+          params: params
         });
+        saveQueue(queue);   
+      }
+
+      var shift = function() {
+        var queue = getQueue();
+        queue.shift();
+        saveQueue(queue);      
+      }
+
+      var funcName = function() {
+        return globalName + '---' + instanceName;
       };
-    }
 
-    StorageBackedQueue.prototype.push = function(params) {
-      var requests = this.getRequests();
-      requests.push({
-        name: this.funcName(), 
-        params: params
-      });
-      this.saveRequests(requests);   
-    }
+      var getQueue= function() {
+        return storage.get(queueKey,[]);
+      }
 
-    StorageBackedQueue.prototype.shift = function() {
-      var requests = this.getRequests();
-      requests.shift();
-      this.saveRequests(requests);      
-    }
+      var saveQueue = function(queue) {
+        return storage.set(queueKey, queue);
+      }  
+
+      var runNext = function() {
+        var next = getQueue()[0];
+        var run = !running && next && funcs[next.name];
+
+        if (run) {
+          running = true;
+          return funcs[next.name](next.params).then(function() {
+            shift();
+            running = false;
+            runNext();
+          }, function(rejection) {
+            return $timeout(function() {
+              running = false;
+              return runNext();
+            }, timeout);
+          });
+        };
+      }
+
+      /* Public methods */
+
+      this.register = function(func) {
+        funcs[funcName()] = func;
+        runNext();
+      };
+
+      this.clearQueue = function() {
+        return storage.set(queueKey,[]);
+      }
+
+      this.run = function(params) {
+        push(params);
+        return runNext();
+      };
+    };
 
     return function(globalName, instanceName) {
       return StorageBackedQueue[instanceName] || (StorageBackedQueue[instanceName] = new StorageBackedQueue(globalName,instanceName));

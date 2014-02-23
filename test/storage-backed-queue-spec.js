@@ -36,13 +36,13 @@ describe('StorageBackedQueue', function () {
     })
 
     it('after calling next the registered function should be called', function() {
-      sbQueue.next(param1);
+      sbQueue.run(param1);
       expect(func).toHaveBeenCalledWith(param1);
     });
 
     it('after calling next the registered function should only be called after the first promise resolved', function() {
-      sbQueue.next(param1);
-      sbQueue.next(param2);
+      sbQueue.run(param1);
+      sbQueue.run(param2);
       expect(func).not.toHaveBeenCalledWith(param2);
       defer1.resolve();
       $rootScope.$apply();
@@ -60,18 +60,18 @@ describe('StorageBackedQueue', function () {
 
     beforeEach(function() {
       // Manually populate the storage backed object
-      // faking a browser restart
-      sbQueue.register(func);
+      // faking a browser restart. Fragile to 
+      // implemenetation of StorageBackedObject
       sbObject = StorageBackedObject(globalQueue);
-
-      sbObject.set('requests', [{
+      sbObject.set('queue', [{
           name: getFuncName(globalQueue, thisInstance), 
           params: param1
       }]);
+
+      sbQueue.register(func);
     });
 
     it('the registered function is called', function() {
-       sbQueue.runNext();
        $rootScope.$apply();
        expect(func).toHaveBeenCalledWith(param1);
     });

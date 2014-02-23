@@ -3,9 +3,9 @@ storage-backed-queue [![Build Status](https://api.travis-ci.org/intelligentgolf/
 
 AngularJS service that persists and retries a queue of promise-based asynchronous function calls to HTML5 storage.
 
-This can be useful when you have calls to $http, along with their `then` callbacks, that must be completed, even after a browser restart, or failed requests due to a dropped internet connection.
+This can be useful when you need to ensure calls to $http are succesful, along with their `then` success callback, even after a browser restart, or after failed requests due to a dropped internet connection.
 
-Because failures are automatically retried, recoverable failures of $http, such as from insufficient permissions due to a session expiring, should be handled using http interceptors.
+Because failures are automatically retried, recoverable failures of $http, such as from insufficient permissions due to a session expiring, should be handled using http interceptors. You should ensure that any requests are idempotent on the server, as the browser treating a request as failed might have been succesful from the server's point of view.
 
 Installation
 ------------
@@ -46,6 +46,7 @@ Then to add a function call to the queue, unique identifier must be passed to `r
     	'data': {'key': 'value'}
     });
     
+After a browser restart, once a function has been (re)-registered, then its queue will be processed, recovering any past queued parameters from HTML5 storage.
 
 
 Limitations

@@ -1,7 +1,5 @@
 angular.module('storage-backed-queue',['storage-backed-object'])
   .factory('StorageBackedQueue', function(StorageBackedObject, $timeout) {
-    var funcs = {};
-    var running = false;
     var timeout = 5 * 1000;
     var queueKey = 'queue';
 
@@ -12,13 +10,15 @@ angular.module('storage-backed-queue',['storage-backed-object'])
       var globalName = globalName_;
       var instanceName = instanceName_;
       var storage = StorageBackedObject(globalName);
+      var funcs = {};
+      var running = false;
 
       /* Private methods */
 
-      var push = function(params) {
+      var push = function(functionId, params) {
         var queue = getQueue();
         queue.push({
-          name: funcName(), 
+          functionId: functionId, 
           params: params
         });
         saveQueue(queue);   
@@ -30,10 +30,6 @@ angular.module('storage-backed-queue',['storage-backed-object'])
         saveQueue(queue);      
       }
 
-      var funcName = function() {
-        return globalName + '---' + instanceName;
-      };
-
       var getQueue= function() {
         return storage.get(queueKey,[]);
       }
@@ -44,27 +40,25 @@ angular.module('storage-backed-queue',['storage-backed-object'])
 
       var runNext = function() {
         var next = getQueue()[0];
-        var run = !running && next && funcs[next.name];
-
-        if (run) {
-          running = true;
-          return funcs[next.name](next.params).then(function() {
-            shift();
+        if (running || !next || !funcs[next.functionId]) return;
+        running = true;
+        return funcs[next.functionId](next.params).then(function() {
+          shift();
+          running = false;
+          runNext();
+        }, function(rejection) {
+          return $timeout(function() {
             running = false;
-            runNext();
-          }, function(rejection) {
-            return $timeout(function() {
-              running = false;
-              return runNext();
-            }, timeout);
-          });
-        };
+            return runNext();
+          }, timeout);
+        });
+
       }
 
       /* Public methods */
 
-      this.register = function(func) {
-        funcs[funcName()] = func;
+      this.register = function(functionId, func) {
+        funcs[functionId] = func;
         runNext();
       };
 
@@ -72,13 +66,13 @@ angular.module('storage-backed-queue',['storage-backed-object'])
         return storage.set(queueKey,[]);
       }
 
-      this.run = function(params) {
-        push(params);
+      this.run = function(functionId, params) {
+        push(functionId, params);
         return runNext();
       };
     };
 
-    return function(globalName, instanceName) {
-      return StorageBackedQueue[instanceName] || (StorageBackedQueue[instanceName] = new StorageBackedQueue(globalName,instanceName));
+    return function(globalName) {
+      return StorageBackedQueue[globalName] || (StorageBackedQueue[globalName] = new StorageBackedQueue(globalName));
     }
   });

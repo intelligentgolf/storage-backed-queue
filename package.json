@@ -12,7 +12,8 @@
     "karma-phantomjs-launcher": "~0.1.2",
     "karma": "~0.10.9",
     "karma-coverage": "~0.2.0",
-    "coveralls": "~2.8.0"
+    "coveralls": "~2.8.0",
+    "jslint": "~0.2.11"
   },
   "repository": {
     "type": "git",

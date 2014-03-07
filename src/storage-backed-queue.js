@@ -19,7 +19,7 @@ angular.module('storage-backed-queue',['storage-backed-object'])
         var queue = getQueue();
         queue.push({
           functionId: functionId, 
-          params: params
+          params: angular.copy(params)
         });
         saveQueue(queue);   
       }

@@ -7,9 +7,13 @@ describe('StorageBackedQueue', function () {
   var StorageBackedQueue, StorageBackedObject, sbQueue, $q, $rootScope, $timeout;
   var globalQueueName = 'storage-queue';
   var defer1, defer2, func;
-  var functionId = 'test-function';
-  var param1 = {'test':'val1'}
-  var param2 = {'test':'val2'};
+  var functionId, param1, param2;
+
+  beforeEach(function() {
+    functionId = 'test-function';
+    param1 = {'test':'val1'}
+    param2 = {'test':'val2'};  
+  });
 
   beforeEach(inject(function (_StorageBackedQueue_, _StorageBackedObject_, _$q_, _$rootScope_, _$timeout_) {
     $q = _$q_;
@@ -51,6 +55,13 @@ describe('StorageBackedQueue', function () {
       expect(func).toHaveBeenCalledWith(param2);
     });
 
+    it('should be called with parameters, even if they have changed', function() {
+      var original = angular.copy(param1);
+      sbQueue.run(functionId, param1);
+      param1.test = 'another-value-not-used-anywhere';
+      expect(func).toHaveBeenCalledWith(original);
+    });
+
   });
 
   describe('After a browser restart', function() {
@@ -87,5 +98,4 @@ describe('StorageBackedQueue', function () {
       expect(func).toHaveBeenCalledWith(param1);
     });
   });
-
 });

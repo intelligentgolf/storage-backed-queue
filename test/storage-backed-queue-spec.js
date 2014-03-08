@@ -1,4 +1,5 @@
-"use strict";
+'use strict';
+/*global describe, it, beforeEach, afterEach, inject, jasmine, expect */
 
 describe('StorageBackedQueue', function () {
 
@@ -11,8 +12,8 @@ describe('StorageBackedQueue', function () {
 
   beforeEach(function() {
     functionId = 'test-function';
-    param1 = {'test':'val1'}
-    param2 = {'test':'val2'};  
+    param1 = {'test':'val1'};
+    param2 = {'test':'val2'};
   });
 
   beforeEach(inject(function (_StorageBackedQueue_, _StorageBackedObject_, _$q_, _$rootScope_, _$timeout_) {
@@ -27,7 +28,7 @@ describe('StorageBackedQueue', function () {
   beforeEach(function() {
     defer1 = $q.defer();
     defer2 = $q.defer();
-    func = jasmine.createSpy().andCallFake(function(param) {
+    func = jasmine.createSpy().andCallFake(function() {
       return defer1.promise;
     });
   });
@@ -39,7 +40,7 @@ describe('StorageBackedQueue', function () {
 
     afterEach(function() {
       sbQueue.clearQueue();
-    })
+    });
 
     it('after calling run it should be called', function() {
       sbQueue.run(functionId, param1);
@@ -73,8 +74,8 @@ describe('StorageBackedQueue', function () {
       // implemenetation of StorageBackedObject
       sbObject = StorageBackedObject(globalQueueName);
       sbObject.set('queue', [{
-          functionId: functionId, 
-          params: param1
+        functionId: functionId,
+        params: param1
       }]);
       sbQueue.register(functionId, func);
     });

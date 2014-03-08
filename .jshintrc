@@ -1,6 +1,4 @@
 {
-  "node": true,
-  "browser": true,
   "esnext": true,
   "bitwise": true,
   "camelcase": true,
@@ -20,8 +18,5 @@
   "unused": true,
   "strict": true,
   "trailing": true,
-  "smarttabs": true,
-  "globals": {
-    "angular": false
-  }
+  "smarttabs": true
 }

@@ -1,7 +1,9 @@
-'use strict';
+/*global angular */
 
 angular.module('storage-backed-queue', ['storage-backed-object'])
   .factory('StorageBackedQueue', function (StorageBackedObject, $timeout) {
+    'use strict';
+
     var timeout = 5 * 1000;
     var queueKey = 'queue';
 

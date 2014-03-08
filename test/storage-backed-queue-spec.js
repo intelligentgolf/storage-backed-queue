@@ -1,7 +1,7 @@
-'use strict';
-/*global describe, it, beforeEach, afterEach, inject, jasmine, expect */
+/*global angular, describe, module, it, beforeEach, afterEach, inject, jasmine, expect */
 
 describe('StorageBackedQueue', function () {
+  'use strict';
 
   beforeEach(module('storage-backed-queue'));
 

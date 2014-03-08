@@ -5,16 +5,17 @@ angular.module('storage-backed-queue', ['storage-backed-object'])
     var timeout = 5 * 1000;
     var queueKey = 'queue';
 
-    var StorageBackedQueue = function (globalName_) {
+    var StorageBackedQueue = function (_globalName_) {
 
       /* Private members */
 
-      var globalName = globalName_;
+      var globalName = _globalName_;
       var storage = StorageBackedObject(globalName);
       var funcs = {};
       var running = false;
 
       /* Private methods */
+
       var push, shift, getQueue, saveQueue, runNext;
 
       push = function (functionId, params) {

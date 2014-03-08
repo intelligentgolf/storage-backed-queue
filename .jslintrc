@@ -1,9 +1,0 @@
-{
-  "predef": [
-    "angular"
-  ],
-  "indent": 2,
-  "vars": true,
-  "newcap": true,
-  "nomen": true
-}
